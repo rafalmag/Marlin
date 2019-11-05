@@ -854,7 +854,7 @@
 #endif
 
 // Play a beep when the feedrate is changed from the Status Screen
-//#define BEEP_ON_FEEDRATE_CHANGE
+#define BEEP_ON_FEEDRATE_CHANGE
 #if ENABLED(BEEP_ON_FEEDRATE_CHANGE)
   #define FEEDRATE_CHANGE_BEEP_DURATION   10
   #define FEEDRATE_CHANGE_BEEP_FREQUENCY 440
@@ -897,14 +897,14 @@
 //#define LCD_DECIMAL_SMALL_XY
 
 // The timeout (in ms) to return to the status screen from sub-menus
-//#define LCD_TIMEOUT_TO_STATUS 15000
+#define LCD_TIMEOUT_TO_STATUS 15000
 
 // Add an 'M73' G-code to set the current percentage
-//#define LCD_SET_PROGRESS_MANUALLY
+#define LCD_SET_PROGRESS_MANUALLY
 
 #if HAS_PRINT_PROGRESS
   //#define PRINT_PROGRESS_SHOW_DECIMALS // Show progress with decimal digits (Graphical LCD only)
-  //#define SHOW_REMAINING_TIME          // Display estimated time to completion (Graphical LCD only)
+  #define SHOW_REMAINING_TIME          // Display estimated time to completion (Graphical LCD only)
 #endif
 
 #if HAS_CHARACTER_LCD && HAS_PRINT_PROGRESS
