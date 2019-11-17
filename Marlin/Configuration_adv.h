@@ -2571,6 +2571,8 @@
  *
  * Implement M486 to allow Marlin to skip objects
  */
+// RM: Host software (such as OctoPrint) may be able to cancel individual objects through a plugin, and in this case they should not use M486 P to cancel objects (although doing so should cause no harm).
+// RM: So not needed.
 //#define CANCEL_OBJECTS
 
 /**
