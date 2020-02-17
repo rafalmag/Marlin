@@ -1,9 +1,9 @@
 version: "1"
-rules:                      # Array of rules
-  - base: bugfix-2.0.x           # Required. Target branch
-    upstream: MarlinFirmware:bugfix-2.0.x    # Required. Must be in the same fork network.
-    mergeMethod: hardreset  # Optional, one of [none, merge, squash, rebase, hardreset], Default: none.
-  - base: 2.0.x           # Required. Target branch
-    upstream: MarlinFirmware:2.0.x    # Required. Must be in the same fork network.
-    mergeMethod: hardreset  # Optional, one of [none, merge, squash, rebase, hardreset], Default: none.
-label: ":arrow_heading_down: pull"  # Optional
+rules:                                     # Array of rules
+  - base: bugfix-2.0.x                     # Required. Target branch
+    upstream: MarlinFirmware:bugfix-2.0.x  # Required. Must be in the same fork network.
+    mergeMethod: hardreset                 # Optional, one of [none, merge, squash, rebase, hardreset], Default: none.
+  - base: 2.0.x                            # Required. Target branch
+    upstream: MarlinFirmware:2.0.x         # Required. Must be in the same fork network.
+    mergeMethod: hardreset                 # Optional, one of [none, merge, squash, rebase, hardreset], Default: none.
+label: ":arrow_heading_down: pull"         # Optional
