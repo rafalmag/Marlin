@@ -56,7 +56,23 @@
 // Estimate the amount of time the Stepper ISR will take to execute
 //
 
+/**
+ * The method of calculating these cycle-constants is unclear.
+ * Most of them are no longer used directly for pulse timing, and exist
+ * only to estimate a maximum step rate based on the user's configuration.
+ * As 32-bit processors continue to diverge, maintaining cycle counts
+ * will become increasingly difficult and error-prone.
+ */
+
 #ifdef CPU_32_BIT
+  /**
+   * Duration of START_TIMED_PULSE
+   *
+   * ...as measured on an LPC1768 with a scope and converted to cycles.
+   * Not applicable to other 32-bit processors, but as long as others
+   * take longer, pulses will be longer. For example the SKR Pro
+   * (stm32f407zgt6) requires ~60 cyles.
+   */
   #define TIMER_READ_ADD_AND_STORE_CYCLES 34UL
 
   // The base ISR takes 792 cycles
@@ -86,6 +102,7 @@
   #define ISR_STEPPER_CYCLES 16UL
 
 #else
+  // Cycles to perform actions in START_TIMED_PULSE
   #define TIMER_READ_ADD_AND_STORE_CYCLES 13UL
 
   // The base ISR takes 752 cycles
@@ -157,17 +174,13 @@
   #define MIN_STEPPER_PULSE_CYCLES _MIN_STEPPER_PULSE_CYCLES(1UL)
 #endif
 
-// Calculate the minimum ticks of the PULSE timer that must elapse with the step pulse enabled
-// adding the "start stepper pulse" code section execution cycles to account for that not all
-// pulses start at the beginning of the loop, so an extra time must be added to compensate so
-// the last generated pulse (usually the extruder stepper) has the right length
+// Calculate the minimum pulse times (high and low)
 #if MINIMUM_STEPPER_PULSE && MAXIMUM_STEPPER_RATE
   constexpr uint32_t _MIN_STEP_PERIOD_NS = 1000000000UL / MAXIMUM_STEPPER_RATE;
   constexpr uint32_t _MIN_PULSE_HIGH_NS = 1000UL * MINIMUM_STEPPER_PULSE;
   constexpr uint32_t _MIN_PULSE_LOW_NS = _MAX((_MIN_STEP_PERIOD_NS - _MIN(_MIN_STEP_PERIOD_NS, _MIN_PULSE_HIGH_NS)), _MIN_PULSE_HIGH_NS);
 #elif MINIMUM_STEPPER_PULSE
   // Assume 50% duty cycle
-  constexpr uint32_t _MIN_STEP_PERIOD_NS = 1000000000UL / MAXIMUM_STEPPER_RATE;
   constexpr uint32_t _MIN_PULSE_HIGH_NS = 1000UL * MINIMUM_STEPPER_PULSE;
   constexpr uint32_t _MIN_PULSE_LOW_NS = _MIN_PULSE_HIGH_NS;
 #elif MAXIMUM_STEPPER_RATE
@@ -178,11 +191,6 @@
   #error "Expected at least one of MINIMUM_STEPPER_PULSE or MAXIMUM_STEPPER_RATE to be defined"
 #endif
 
-// TODO: NS_TO_PULSE_TIMER_TICKS has some rounding issues:
-//   1. PULSE_TIMER_TICKS_PER_US rounds to an integer, which loses 20% of the count for a 2.5 MHz pulse tick (such as for LPC1768)
-//   2. The math currently rounds down to the closes tick. Perhaps should round up.
-constexpr uint32_t NS_TO_PULSE_TIMER_TICKS(uint32_t NS) { return PULSE_TIMER_TICKS_PER_US * (NS) / 1000UL; }
-#define CYCLES_TO_NS(CYC) (1000UL * (CYC) / ((F_CPU) / 1000000))
 
 // But the user could be enforcing a minimum time, so the loop time is
 #define ISR_LOOP_CYCLES (ISR_LOOP_BASE_CYCLES + _MAX(MIN_STEPPER_PULSE_CYCLES, MIN_ISR_LOOP_CYCLES))
@@ -266,11 +274,15 @@ class Stepper {
     #if ENABLED(Y_DUAL_ENDSTOPS)
       static bool locked_Y_motor, locked_Y2_motor;
     #endif
-    #if Z_MULTI_ENDSTOPS || ENABLED(Z_STEPPER_AUTO_ALIGN)
-      static bool locked_Z_motor, locked_Z2_motor;
-    #endif
-    #if ENABLED(Z_TRIPLE_ENDSTOPS) || BOTH(Z_STEPPER_AUTO_ALIGN, Z_TRIPLE_STEPPER_DRIVERS)
-      static bool locked_Z3_motor;
+    #if EITHER(Z_MULTI_ENDSTOPS, Z_STEPPER_AUTO_ALIGN)
+      static bool locked_Z_motor, locked_Z2_motor
+                  #if NUM_Z_STEPPER_DRIVERS >= 3
+                    , locked_Z3_motor
+                    #if NUM_Z_STEPPER_DRIVERS >= 4
+                      , locked_Z4_motor
+                    #endif
+                  #endif
+                  ;
     #endif
 
     static uint32_t acceleration_time, deceleration_time; // time measured in Stepper Timer ticks
@@ -422,12 +434,15 @@ class Stepper {
       FORCE_INLINE static void set_y_lock(const bool state) { locked_Y_motor = state; }
       FORCE_INLINE static void set_y2_lock(const bool state) { locked_Y2_motor = state; }
     #endif
-    #if Z_MULTI_ENDSTOPS || (ENABLED(Z_STEPPER_AUTO_ALIGN) && Z_MULTI_STEPPER_DRIVERS)
+    #if EITHER(Z_MULTI_ENDSTOPS, Z_STEPPER_AUTO_ALIGN)
       FORCE_INLINE static void set_z_lock(const bool state) { locked_Z_motor = state; }
       FORCE_INLINE static void set_z2_lock(const bool state) { locked_Z2_motor = state; }
-    #endif
-    #if ENABLED(Z_TRIPLE_ENDSTOPS) || BOTH(Z_STEPPER_AUTO_ALIGN, Z_TRIPLE_STEPPER_DRIVERS)
-      FORCE_INLINE static void set_z3_lock(const bool state) { locked_Z3_motor = state; }
+      #if NUM_Z_STEPPER_DRIVERS >= 3
+        FORCE_INLINE static void set_z3_lock(const bool state) { locked_Z3_motor = state; }
+        #if NUM_Z_STEPPER_DRIVERS >= 4
+          FORCE_INLINE static void set_z4_lock(const bool state) { locked_Z4_motor = state; }
+        #endif
+      #endif
     #endif
 
     #if ENABLED(BABYSTEPPING)
