@@ -1518,7 +1518,9 @@
   //#define MIN_PROBE_EDGE_LEFT MIN_PROBE_EDGE
   //#define MIN_PROBE_EDGE_RIGHT MIN_PROBE_EDGE
   //#define MIN_PROBE_EDGE_FRONT MIN_PROBE_EDGE
+  #define MIN_PROBE_EDGE_FRONT 30
   //#define MIN_PROBE_EDGE_BACK MIN_PROBE_EDGE
+  #define MIN_PROBE_EDGE_BACK 30
 #endif
 
 #if EITHER(MESH_BED_LEVELING, AUTO_BED_LEVELING_UBL)
@@ -1847,7 +1849,7 @@
   #define FILAMENT_CHANGE_FAST_LOAD_FEEDRATE   6  // (mm/s) Load filament feedrate. This can be pretty fast.
   #define FILAMENT_CHANGE_FAST_LOAD_ACCEL     25  // (mm/s^2) Lower acceleration may allow a faster feedrate.
   // RM: I use much shorter distance as I push it anyway, for TPU I would just use "feed", but the speed is too fast anyway...
-  #define FILAMENT_CHANGE_FAST_LOAD_LENGTH   100  // (mm) Load length of filament, from extruder gear to nozzle.
+  #define FILAMENT_CHANGE_FAST_LOAD_LENGTH    50  // (mm) Load length of filament, from extruder gear to nozzle.
                                                   //   For Bowden, the full length of the tube and nozzle.
                                                   //   For direct drive, the full length of the nozzle.
   //#define ADVANCED_PAUSE_CONTINUOUS_PURGE       // Purge continuously up to the purge length until interrupted.
@@ -2850,7 +2852,8 @@
  * Host Prompt Support enables Marlin to use the host for user prompts so
  * filament runout and other processes can be managed from the host side.
  */
-//#define HOST_ACTION_COMMANDS
+// RM: enabled to let octoprint know about certain actions, eg. pause on menu or by filament runout sensor
+#define HOST_ACTION_COMMANDS
 #if ENABLED(HOST_ACTION_COMMANDS)
   //#define HOST_PROMPT_SUPPORT
 #endif

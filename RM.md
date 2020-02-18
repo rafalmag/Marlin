@@ -21,3 +21,9 @@ umount /media/usb/
 ```
 
 # Restart printer
+
+Then regarding EPPROM - from printers LCD:
+- restore failsafe - Reset all configurable settings to their factory defaults (M502)
+- save - To also reset settings in EEPROM - (M500)
+
+(Reset settings and save them to EEPROM: M502;M500;)
