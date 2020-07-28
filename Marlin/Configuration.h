@@ -121,7 +121,8 @@
  *
  * :[2400, 9600, 19200, 38400, 57600, 115200, 250000, 500000, 1000000]
  */
-#define BAUDRATE 115200
+// RM: updated to higher value than before
+#define BAUDRATE 250000
 
 // Enable the Bluetooth serial interface on AT90USB devices
 //#define BLUETOOTH
@@ -1101,6 +1102,7 @@
 #define Z_HOME_DIR -1
 
 // @section machine
+// RM TODO might need to update for BMG extruder new position
 
 // The size of the print bed
 #define X_BED_SIZE 235
@@ -1923,7 +1925,7 @@
 // RepRapDiscount FULL GRAPHIC Smart Controller
 // http://reprap.org/wiki/RepRapDiscount_Full_Graphic_Smart_Controller
 //
-//#define REPRAP_DISCOUNT_FULL_GRAPHIC_SMART_CONTROLLER
+#define REPRAP_DISCOUNT_FULL_GRAPHIC_SMART_CONTROLLER
 
 //
 // ReprapWorld Graphical LCD
@@ -2003,7 +2005,7 @@
 // This is RAMPS-compatible using a single 10-pin connector.
 // (For CR-10 owners who want to replace the Melzi Creality board but retain the display)
 //
-#define CR10_STOCKDISPLAY
+//#define CR10_STOCKDISPLAY
 
 //
 // Ender-2 OEM display, a variant of the MKS_MINI_12864
