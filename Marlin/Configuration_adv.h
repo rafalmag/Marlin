@@ -1897,7 +1897,7 @@
   #define FILAMENT_CHANGE_FAST_LOAD_FEEDRATE   6  // (mm/s) Load filament feedrate. This can be pretty fast.
   #define FILAMENT_CHANGE_FAST_LOAD_ACCEL     25  // (mm/s^2) Lower acceleration may allow a faster feedrate.
   // RM: I use much shorter distance as I push it anyway, for TPU I would just use "feed", but the speed is too fast anyway...
-  // RM TODO direct drive: reduce !
+  // RM TODO direct drive: reduced
   #define FILAMENT_CHANGE_FAST_LOAD_LENGTH    20  // (mm) Load length of filament, from extruder gear to nozzle.
                                                   //   For Bowden, the full length of the tube and nozzle.
                                                   //   For direct drive, the full length of the nozzle.

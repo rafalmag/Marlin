@@ -484,10 +484,10 @@
 
   // If you are using a pre-configured hotend then you can use one of the value sets by uncommenting it
 
-  // Creality Ender-3
-  #define DEFAULT_Kp 21.73
-  #define DEFAULT_Ki 1.54
-  #define DEFAULT_Kd 76.55
+  // Creality Ender-3 (copper hotend)
+  #define DEFAULT_Kp 14.29
+  #define DEFAULT_Ki 0.72
+  #define DEFAULT_Kd 71.28
 
   // Ultimaker
   //#define DEFAULT_Kp 22.2
@@ -967,6 +967,7 @@
  *
  * Specify a Probe position as { X, Y, Z }
  */
+// RM TODO doublecheck for new DD setup
 #define NOZZLE_TO_PROBE_OFFSET { -42, -16, -0.480 }
 
 // Most probes should stay away from the edges of the bed, but
@@ -1102,7 +1103,8 @@
 #define Z_HOME_DIR -1
 
 // @section machine
-// RM TODO might need to update for BMG extruder new position
+// RM TODO: might need to update for BMG extruder new position
+// experiment with M206/M428 to set the HOME_OFFSET / WORKSPACE_OFFSETS
 
 // The size of the print bed
 #define X_BED_SIZE 235
@@ -1172,7 +1174,8 @@
   // After a runout is detected, continue printing this length of filament
   // before executing the runout script. Useful for a sensor at the end of
   // a feed tube. Requires 4 bytes SRAM per sensor, plus 4 bytes overhead.
-  //#define FILAMENT_RUNOUT_DISTANCE_MM 25
+  // RM: enabled because of false positives
+  #define FILAMENT_RUNOUT_DISTANCE_MM 40
 
   #ifdef FILAMENT_RUNOUT_DISTANCE_MM
     // Enable this option to use an encoder disc that toggles the runout pin
