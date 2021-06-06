@@ -576,7 +576,7 @@
 // RM: Consider using this to enable 24V LEDs via MOSFET/relay.
 #define CASE_LIGHT_ENABLE
 #if ENABLED(CASE_LIGHT_ENABLE)
-  #define CASE_LIGHT_PIN P1.24                  // Override the default pin if needed
+  #define CASE_LIGHT_PIN P1_24                  // Override the default pin if needed
   #define INVERT_CASE_LIGHT false             // Set true if Case Light is ON when pin is LOW
   #define CASE_LIGHT_DEFAULT_ON true          // Set default power-up state on
   #define CASE_LIGHT_DEFAULT_BRIGHTNESS 105   // Set default power-up brightness (0-255, requires PWM pin)
@@ -1900,8 +1900,10 @@
 #if PROBE_SELECTED && !IS_KINEMATIC
   //#define PROBING_MARGIN_LEFT PROBING_MARGIN
   //#define PROBING_MARGIN_RIGHT PROBING_MARGIN
-  #define PROBING_MARGIN_FRONT 30 //PROBING_MARGIN
-  #define PROBING_MARGIN_BACK 50 PROBING_MARGIN
+  //#define PROBING_MARGIN_FRONT PROBING_MARGIN
+  #define PROBING_MARGIN_FRONT 30
+  // #define PROBING_MARGIN_BACK PROBING_MARGIN
+  #define PROBING_MARGIN_BACK 50
 #endif
 
 #if EITHER(MESH_BED_LEVELING, AUTO_BED_LEVELING_UBL)
