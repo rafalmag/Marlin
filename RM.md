@@ -4,10 +4,12 @@
 Platformio build
 ```
 scp .pio/build/LPC1768/firmware.bin rafal@192.168.1.10:~
+OR
+scp .pio/build/LPC1768/firmware.bin rafal@orangepipcplus:~
 ```
 
 # On printer
-release media
+release media (M22)
 
 # On OrangePi
 ```
