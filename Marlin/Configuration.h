@@ -1507,8 +1507,8 @@
  *     |    [-]    |
  *     O-- FRONT --+
  */
-// RM - TODO doublecheck for new DD setup
-#define NOZZLE_TO_PROBE_OFFSET { -46, 5, -0.70 }
+// RM - direct drive (BMG extruder) setup with BLTouch
+#define NOZZLE_TO_PROBE_OFFSET { -46, 5, -0.84 }
 
 // Most probes should stay away from the edges of the bed, but
 // with NOZZLE_AS_PROBE this can be negative for a wider probing area.
@@ -1727,9 +1727,10 @@
 // experiment with M206/M428 to set the HOME_OFFSET / WORKSPACE_OFFSETS
 
 // The size of the printable area
-// RM - (left 7 mm are not printable, and from there after a small margin the total printalble is just 225mm
+// RM - (left 7 mm are not printable, and from there after a small margin the total printable is just 225 (+5mm than stock!)
+// RM - see https://clevercreations.org/ender-3-v2-pro-bed-size-build-volume/
 #define X_BED_SIZE 225
-// RM - direct has shorter bed - TODO 2023 - recheck
+// RM - direct has shorter bed than stock 220, but due to large stock margin it is just 10mm shorter
 #define Y_BED_SIZE 210
 
 // Travel limits (linear=mm, rotational=°) after homing, corresponding to endstop positions.
