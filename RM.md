@@ -85,6 +85,7 @@ umount /media/usb/
 
 ### Restart printer
 
-Then regarding EPPROM - from printers LCD:
+Then regarding EPPROM - from printers LCD / OctoPrint command interface:
 - restore default settings - Reset all configurable settings to their factory defaults (M502)
 - save - default settings in EEPROM - (M500)
+- read the setting M503 and compare with `M503.txt` to reveal any differences
