@@ -1195,7 +1195,7 @@
  * Override with M203
  *                                      X, Y, Z [, I [, J [, K...]]], E0 [, E1[, E2...]]
  */
-// RM 300->500
+// RM 300->500 - from Creality Ender 3
 #define DEFAULT_MAX_FEEDRATE          { 500, 500, 5, 25 }
 
 //#define LIMITED_MAX_FR_EDITING        // Limit edit via M203 or LCD to DEFAULT_MAX_FEEDRATE * 2
@@ -1209,7 +1209,7 @@
  * Override with M201
  *                                      X, Y, Z [, I [, J [, K...]]], E0 [, E1[, E2...]]
  */
-// RM custom
+// RM - from Creality Ender 3 for XYZ, and 5000 for E
 #define DEFAULT_MAX_ACCELERATION      { 500, 500, 100, 5000 }
 
 //#define LIMITED_MAX_ACCEL_EDITING     // Limit edit via M201 or LCD to DEFAULT_MAX_ACCELERATION * 2
@@ -1225,10 +1225,11 @@
  *   M204 R    Retract Acceleration
  *   M204 T    Travel Acceleration
  */
-// RM custom
+// RM - from Creality Ender 3
 #define DEFAULT_ACCELERATION          500    // X, Y, Z and E acceleration for printing moves
 #define DEFAULT_RETRACT_ACCELERATION  500    // E acceleration for retracts
-#define DEFAULT_TRAVEL_ACCELERATION   500    // X, Y, Z acceleration for travel (non printing) moves
+// RM - from Creality Ender 3
+#define DEFAULT_TRAVEL_ACCELERATION   1000    // X, Y, Z acceleration for travel (non printing) moves
 
 /**
  * Default Jerk limits (mm/s)
@@ -1600,7 +1601,7 @@
 #define Z_PROBE_OFFSET_RANGE_MAX 20
 
 // Enable the M48 repeatability test to test probe accuracy
-// RM - enabled
+// RM - enabled for TFT35
 #define Z_MIN_PROBE_REPEATABILITY_TEST
 
 // Before deploy/stow pause for user confirmation
@@ -1811,6 +1812,8 @@
  * For other boards you may need to define FIL_RUNOUT_PIN, FIL_RUNOUT2_PIN, etc.
  */
 // RM - used Y+ pin
+// RM - instead of default "P1_28"="X+" I am using "P1_26"="Y+"" endstop sensor (overrides setting in pins_BTT_SKR_V1.3.h)
+#define FIL_RUNOUT_PIN   P1_26 
 #define FILAMENT_RUNOUT_SENSOR
 #if ENABLED(FILAMENT_RUNOUT_SENSOR)
   #define FIL_RUNOUT_ENABLED_DEFAULT true // Enable the sensor on startup. Override with M412 followed by M500.
@@ -1981,7 +1984,7 @@
   /**
    * Enable the G26 Mesh Validation Pattern tool.
    */
-  // RM - enabled
+  // RM - enabled for TFT35
   #define G26_MESH_VALIDATION
   #if ENABLED(G26_MESH_VALIDATION)
     #define MESH_TEST_NOZZLE_SIZE    0.4  // (mm) Diameter of primary nozzle.
@@ -2293,7 +2296,7 @@
  *    P1  Raise the nozzle always to Z-park height.
  *    P2  Raise the nozzle by Z-park amount, limited to Z_MAX_POS.
  */
-// RM - enabled
+// RM - enabled for TFT35
 #define NOZZLE_PARK_FEATURE
 
 #if ENABLED(NOZZLE_PARK_FEATURE)

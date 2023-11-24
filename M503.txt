@@ -4,30 +4,30 @@ Recv: echo:  G21 ; (mm)
 Recv: echo:; Temperature Units:
 Recv: echo:  M149 C ; Units in Celsius
 Recv: echo:; Filament settings (Disabled):
-Recv: echo:  M200 S0 D1.75
+Recv: echo:  M200 S0 D1.7500
 Recv: echo:; Steps per unit:
-Recv: echo:  M92 X80.00 Y80.00 Z400.00 E411.00
+Recv: echo:  M92 X80.0000 Y80.0000 Z400.0000 E411.0000
 Recv: echo:; Max feedrates (units/s):
-Recv: echo:  M203 X500.00 Y500.00 Z5.00 E25.00
+Recv: echo:  M203 X500.0000 Y500.0000 Z5.0000 E25.0000
 Recv: echo:; Max Acceleration (units/s2):
-Recv: echo:  M201 X500.00 Y500.00 Z100.00 E5000.00
+Recv: echo:  M201 X500.0000 Y500.0000 Z100.0000 E5000.0000
 Recv: echo:; Acceleration (units/s2) (P<print-accel> R<retract-accel> T<travel-accel>):
-Recv: echo:  M204 P500.00 R500.00 T500.00
+Recv: echo:  M204 P500.0000 R500.0000 T500.0000
 Recv: echo:; Advanced (B<min_segment_time_us> S<min_feedrate> T<min_travel_feedrate> J<junc_dev>):
-Recv: echo:  M205 B20000.00 S0.00 T0.00 J0.08
+Recv: echo:  M205 B20000.0000 S0.0000 T0.0000 J0.0800
 Recv: echo:; Home offset:
-Recv: echo:  M206 X0.00 Y0.00 Z0.00
+Recv: echo:  M206 X0.0000 Y0.0000 Z0.0000
 Recv: echo:; Auto Bed Leveling:
-Recv: echo:  M420 S0 Z10.00 ; Leveling OFF
+Recv: echo:  M420 S0 Z10.0000 ; Leveling OFF
 Recv: echo:; Material heatup parameters:
-Recv: echo:  M145 S0 H190.00 B60.00 F255
-Recv: echo:  M145 S1 H230.00 B70.00 F255
+Recv: echo:  M145 S0 H190.0000 B60.0000 F255
+Recv: echo:  M145 S1 H230.0000 B70.0000 F255
 Recv: echo:; Hotend PID:
-Recv: echo:  M301 P12.81 I0.62 D65.60
+Recv: echo:  M301 P12.8100 I0.6200 D65.6000
 Recv: echo:; Bed PID:
-Recv: echo:  M304 P129.64 I22.80 D491.38
+Recv: echo:  M304 P129.6400 I22.8000 D491.3800
 Recv: echo:; Z-Probe Offset:
-Recv: echo:  M851 X-46.00 Y5.00 Z-0.84 ; (mm)
+Recv: echo:  M851 X-46.0000 Y5.0000 Z-0.8400 ; (mm)
 Recv: echo:; Stepper driver current:
 Recv: echo:  M906 X600 Y600 Z600
 Recv: echo:  M906 T0 E700
@@ -40,7 +40,7 @@ Recv: echo:; Driver stepping mode:
 Recv: echo:  M569 S1 X Y Z
 Recv: echo:  M569 S1 T0 E
 Recv: echo:; Filament load/unload:
-Recv: echo:  M603 L20.00 U70.00 ; (mm)
+Recv: echo:  M603 L20.0000 U70.0000 ; (mm)
 Recv: echo:; Filament runout sensor:
-Recv: echo:  M412 S1 D40.00 ; Sensor ON
-Recv: ok
+Recv: echo:  M412 S1 D40.0000 ; Sensor ON
+Recv: ok P15 B3
