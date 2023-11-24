@@ -12,7 +12,7 @@ Recv: echo:  M203 X500.0000 Y500.0000 Z5.0000 E25.0000
 Recv: echo:; Max Acceleration (units/s2):
 Recv: echo:  M201 X500.0000 Y500.0000 Z100.0000 E5000.0000
 Recv: echo:; Acceleration (units/s2) (P<print-accel> R<retract-accel> T<travel-accel>):
-Recv: echo:  M204 P500.0000 R500.0000 T500.0000
+Recv: echo:  M204 P500.0000 R500.0000 T1000.0000
 Recv: echo:; Advanced (B<min_segment_time_us> S<min_feedrate> T<min_travel_feedrate> J<junc_dev>):
 Recv: echo:  M205 B20000.0000 S0.0000 T0.0000 J0.0800
 Recv: echo:; Home offset:
