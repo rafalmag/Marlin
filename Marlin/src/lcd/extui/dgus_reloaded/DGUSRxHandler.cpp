@@ -30,14 +30,15 @@
 #include "config/DGUS_ScreenID.h"
 
 #include "../ui_api.h"
+
+#if HAS_FILAMENT_SENSOR
+  #include "../../../feature/runout.h"
+#endif
 #include "../../../core/language.h"
 #include "../../../module/temperature.h"
 #include "../../../module/printcounter.h"
 #include "../../../module/stepper.h"
 #include "../../../gcode/queue.h"
-#if ENABLED(ADVANCED_PAUSE_FEATURE)
-  #include "../../../feature/pause.h"
-#endif
 #if ENABLED(POWER_LOSS_RECOVERY)
   #include "../../../feature/powerloss.h"
 #endif
@@ -49,7 +50,7 @@ void DGUSRxHandler::screenChange(DGUS_VP &vp, void *data_ptr) {
     #if HAS_MEDIA
       IF_DISABLED(HAS_SD_DETECT, card.mount());
 
-      if (!ExtUI::isMediaInserted()) {
+      if (!ExtUI::isMediaMounted()) {
         screen.setStatusMessage(GET_TEXT_F(MSG_NO_MEDIA));
         return;
       }
@@ -231,12 +232,8 @@ void DGUSRxHandler::flowrate(DGUS_VP &vp, void *data_ptr) {
       ExtUI::setFlow_percent(flowrate, TERN(HAS_MULTI_EXTRUDER, ExtUI::getActiveTool(), ExtUI::E0));
       break;
     #if HAS_MULTI_EXTRUDER
-      case DGUS_Addr::ADJUST_SetFlowrate_E0:
-        ExtUI::setFlow_percent(flowrate, ExtUI::E0);
-        break;
-      case DGUS_Addr::ADJUST_SetFlowrate_E1:
-        ExtUI::setFlow_percent(flowrate, ExtUI::E1);
-        break;
+      case DGUS_Addr::ADJUST_SetFlowrate_E0: ExtUI::setFlow_percent(flowrate, ExtUI::E0); break;
+      case DGUS_Addr::ADJUST_SetFlowrate_E1: ExtUI::setFlow_percent(flowrate, ExtUI::E1); break;
     #endif
   }
 
@@ -265,12 +262,8 @@ void DGUSRxHandler::babystep(DGUS_VP &vp, void *data_ptr) {
 
   switch (adjust) {
     default: return;
-    case DGUS_Data::Adjust::INCREMENT:
-      steps = ExtUI::mmToWholeSteps(DGUS_PRINT_BABYSTEP, ExtUI::Z);
-      break;
-    case DGUS_Data::Adjust::DECREMENT:
-      steps = ExtUI::mmToWholeSteps(-DGUS_PRINT_BABYSTEP, ExtUI::Z);
-      break;
+    case DGUS_Data::Adjust::INCREMENT: steps = ExtUI::mmToWholeSteps(DGUS_PRINT_BABYSTEP, ExtUI::Z); break;
+    case DGUS_Data::Adjust::DECREMENT: steps = ExtUI::mmToWholeSteps(-DGUS_PRINT_BABYSTEP, ExtUI::Z); break;
   }
 
   ExtUI::smartAdjustAxis_steps(steps, ExtUI::Z, true);
@@ -319,16 +312,10 @@ void DGUSRxHandler::tempTarget(DGUS_VP &vp, void *data_ptr) {
 
   switch (vp.addr) {
     default: return;
-    case DGUS_Addr::TEMP_SetTarget_Bed:
-      ExtUI::setTargetTemp_celsius(temp, ExtUI::BED);
-      break;
-    case DGUS_Addr::TEMP_SetTarget_H0:
-      ExtUI::setTargetTemp_celsius(temp, ExtUI::H0);
-      break;
+    case DGUS_Addr::TEMP_SetTarget_Bed:  ExtUI::setTargetTemp_celsius(temp, ExtUI::BED); break;
+    case DGUS_Addr::TEMP_SetTarget_H0:   ExtUI::setTargetTemp_celsius(temp, ExtUI::H0); break;
     #if HAS_MULTI_HOTEND
-      case DGUS_Addr::TEMP_SetTarget_H1:
-        ExtUI::setTargetTemp_celsius(temp, ExtUI::H1);
-        break;
+      case DGUS_Addr::TEMP_SetTarget_H1: ExtUI::setTargetTemp_celsius(temp, ExtUI::H1); break;
     #endif
   }
 
@@ -349,16 +336,10 @@ void DGUSRxHandler::tempCool(DGUS_VP &vp, void *data_ptr) {
         ExtUI::setTargetTemp_celsius(0, ExtUI::H1);
       #endif
       break;
-    case DGUS_Data::Heater::BED:
-      ExtUI::setTargetTemp_celsius(0, ExtUI::BED);
-      break;
-    case DGUS_Data::Heater::H0:
-      ExtUI::setTargetTemp_celsius(0, ExtUI::H0);
-      break;
+    case DGUS_Data::Heater::BED:  ExtUI::setTargetTemp_celsius(0, ExtUI::BED); break;
+    case DGUS_Data::Heater::H0:   ExtUI::setTargetTemp_celsius(0, ExtUI::H0); break;
     #if HAS_MULTI_HOTEND
-      case DGUS_Data::Heater::H1:
-        ExtUI::setTargetTemp_celsius(0, ExtUI::H1);
-        break;
+      case DGUS_Data::Heater::H1: ExtUI::setTargetTemp_celsius(0, ExtUI::H1); break;
     #endif
   }
 
@@ -474,29 +455,28 @@ void DGUSRxHandler::moveToPoint(DGUS_VP &vp, void *data_ptr) {
       y = DGUS_LEVEL_CENTER_Y;
       break;
     case 2:
-      x = X_MIN_POS + lfrb[0];
-      y = Y_MIN_POS + lfrb[1];
+      x = X_MIN_BED + lfrb[0];
+      y = Y_MIN_BED + lfrb[1];
       break;
     case 3:
-      x = X_MAX_POS - lfrb[2];
-      y = Y_MIN_POS + lfrb[1];
+      x = X_MAX_BED - lfrb[2];
+      y = Y_MIN_BED + lfrb[1];
       break;
     case 4:
-      x = X_MAX_POS - lfrb[2];
-      y = Y_MAX_POS - lfrb[3];
+      x = X_MAX_BED - lfrb[2];
+      y = Y_MAX_BED - lfrb[3];
       break;
     case 5:
-      x = X_MIN_POS + lfrb[0];
-      y = Y_MAX_POS - lfrb[3];
+      x = X_MIN_BED + lfrb[0];
+      y = Y_MAX_BED - lfrb[3];
       break;
   }
 
-  if (ExtUI::getAxisPosition_mm(ExtUI::Z) < Z_MIN_POS + BED_TRAMMING_Z_HOP) {
-    ExtUI::setAxisPosition_mm(Z_MIN_POS + BED_TRAMMING_Z_HOP, ExtUI::Z);
-  }
+  if (BED_TRAMMING_Z_HOP)
+    ExtUI::setAxisPosition_mm(ExtUI::getAxisPosition_mm(ExtUI::Z) + (BED_TRAMMING_Z_HOP), ExtUI::Z);
   ExtUI::setAxisPosition_mm(x, ExtUI::X);
   ExtUI::setAxisPosition_mm(y, ExtUI::Y);
-  ExtUI::setAxisPosition_mm(Z_MIN_POS + BED_TRAMMING_HEIGHT, ExtUI::Z);
+  ExtUI::setAxisPosition_mm((Z_MIN_POS) + (BED_TRAMMING_HEIGHT), ExtUI::Z);
 }
 
 void DGUSRxHandler::probe(DGUS_VP &vp, void *data_ptr) {
@@ -504,7 +484,7 @@ void DGUSRxHandler::probe(DGUS_VP &vp, void *data_ptr) {
   UNUSED(data_ptr);
 
   #if ENABLED(MESH_BED_LEVELING)
-    screen.setStatusMessage(FPSTR(DGUS_MSG_ABL_REQUIRED));
+    screen.setStatusMessage(GET_TEXT_F(DGUS_MSG_ABL_REQUIRED));
     return;
   #endif
 
@@ -677,11 +657,11 @@ void DGUSRxHandler::moveStep(DGUS_VP &vp, void *data_ptr) {
 
   switch (direction) {
     default: return;
-    case DGUS_Data::MoveDirection::XM: offset = -offset;
+    case DGUS_Data::MoveDirection::XM: offset *= -1;
     case DGUS_Data::MoveDirection::XP: axis = ExtUI::X; break;
-    case DGUS_Data::MoveDirection::YM: offset = -offset;
+    case DGUS_Data::MoveDirection::YM: offset *= -1;
     case DGUS_Data::MoveDirection::YP: axis = ExtUI::Y; break;
-    case DGUS_Data::MoveDirection::ZM: offset = -offset;
+    case DGUS_Data::MoveDirection::ZM: offset *= -1;
     case DGUS_Data::MoveDirection::ZP: axis = ExtUI::Z; break;
   }
 
@@ -805,19 +785,23 @@ void DGUSRxHandler::pidSetTemp(DGUS_VP &vp, void *data_ptr) {
     return;
   }
 
-  uint16_t temp = BE16_P(data_ptr);
+  celsius_t temp = BE16_P(data_ptr);
 
   switch (screen.pid_heater) {
     default: return;
-    case DGUS_Data::Heater::BED:
-      temp = constrain(temp, BED_MINTEMP, BED_MAX_TARGET);
-      break;
-    case DGUS_Data::Heater::H0:
-      temp = constrain(temp, HEATER_0_MINTEMP, (HEATER_0_MAXTEMP - HOTEND_OVERSHOOT));
-      break;
+    #if HAS_HEATED_BED
+      case DGUS_Data::Heater::BED:
+        LIMIT(temp, celsius_t(BED_MINTEMP), celsius_t(BED_MAX_TARGET));
+        break;
+    #endif
+    #if HAS_HOTEND
+      case DGUS_Data::Heater::H0:
+        LIMIT(temp, celsius_t(HEATER_0_MINTEMP), thermalManager.hotend_max_target(0));
+        break;
+    #endif
     #if HAS_MULTI_HOTEND
       case DGUS_Data::Heater::H1:
-        temp = constrain(temp, HEATER_1_MINTEMP, (HEATER_1_MAXTEMP - HOTEND_OVERSHOOT));
+        LIMIT(temp, celsius_t(HEATER_1_MINTEMP), thermalManager.hotend_max_target(0));
         break;
     #endif
   }
@@ -949,6 +933,64 @@ void DGUSRxHandler::waitContinue(DGUS_VP &vp, void *data_ptr) {
   ExtUI::setUserConfirmed();
 
   screen.triggerFullUpdate();
+}
+
+#if HAS_FILAMENT_SENSOR
+
+  void DGUSRxHandler::filamentSensorToggle(DGUS_VP &vp, void *data_ptr) {
+    UNUSED(vp);
+
+    const DGUS_Data::FilamentSensor sensor = (DGUS_Data::FilamentSensor)((uint8_t*)data_ptr)[1];
+
+    switch (sensor) {
+      default: return;
+      case DGUS_Data::FilamentSensor::RUNOUT:
+        ExtUI::setFilamentRunoutEnabled(!ExtUI::getFilamentRunoutEnabled());
+        break;
+      #if ENABLED(FILAMENT_SWITCH_AND_MOTION)
+        case DGUS_Data::FilamentSensor::JAM:
+          if (runout.motion_distance() > 0) {
+            screen.jam_length = runout.motion_distance();
+            runout.set_motion_distance(0);
+          }
+          else
+            runout.set_motion_distance(screen.jam_length);
+          break;
+      #endif
+    }
+
+    runout.reset();
+    screen.triggerFullUpdate();
+  }
+
+  #if ENABLED(FILAMENT_SWITCH_AND_MOTION)
+    void DGUSRxHandler::filamentSensorJam(DGUS_VP &vp, void *data_ptr) {
+      UNUSED(vp);
+
+      const uint16_t length = BE16_P(data_ptr);
+
+      if (length) screen.jam_length = length;
+      runout.set_motion_distance(length);
+      runout.reset();
+
+      screen.triggerFullUpdate();
+    }
+  #endif
+
+  void DGUSRxHandler::filamentSensorSave(DGUS_VP &vp, void *data_ptr) {
+    UNUSED(vp);
+    UNUSED(data_ptr);
+
+    screen.triggerEEPROMSave();
+  }
+
+#endif // HAS_FILAMENT_SENSOR
+
+void DGUSRxHandler::language(DGUS_VP &vp, void *data_ptr) {
+  UNUSED(vp);
+
+  screen.language = ((uint8_t*)data_ptr)[1];
+  screen.triggerEEPROMSave();
 }
 
 void DGUSRxHandler::fanSpeed(DGUS_VP &vp, void *data_ptr) {

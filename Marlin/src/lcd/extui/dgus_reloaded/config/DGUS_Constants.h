@@ -73,15 +73,9 @@
   #define DGUS_DEFAULT_FILAMENT_LEN 10
 #endif
 
-#ifndef BED_TRAMMING_Z_HOP
-  #define BED_TRAMMING_Z_HOP 4.0
+#ifndef DGUS_DEFAULT_JAM_LEN
+  #define DGUS_DEFAULT_JAM_LEN 10 // (mm) Jam length restored when jam detection is turned back on
 #endif
-
-#ifndef BED_TRAMMING_HEIGHT
-  #define BED_TRAMMING_HEIGHT 0.0
-#endif
-
-static_assert(BED_TRAMMING_Z_HOP >= 0, "BED_TRAMMING_Z_HOP must be >= 0. Please update your configuration.");
 
 #ifndef DGUS_LEVEL_CENTER_X
   #define DGUS_LEVEL_CENTER_X ((X_BED_SIZE) / 2)

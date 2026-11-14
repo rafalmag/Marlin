@@ -438,7 +438,9 @@ static const hd44780_charmap_t g_hd44780_charmap_device[] PROGMEM = {
     {IV('⎲'), 0x12, 0},
     {IV('⎳'), 0x13, 0},
 
-    {IV('⏱'), 0x07, 0}, // Marlin special: '🕐🕑🕒🕓🕔🕕🕖🕗🕘🕙🕚🕛🕜🕝🕞🕟🕠🕡🕢🕣🕤🕥🕦🕧 ⌚⌛⏰⏱⏳⧖⧗'  LCD_STR_CLOCK (0x05)
+    #if NEED_CLOCK_GLYPH
+      {IV('⏱'), 0x07, 0}, // Marlin special: '🕐🕑🕒🕓🕔🕕🕖🕗🕘🕙🕚🕛🕜🕝🕞🕟🕠🕡🕢🕣🕤🕥🕦🕧 ⌚⌛⏰⏱⏳⧖⧗'  LCD_STR_CLOCK (0x05)
+    #endif
     {IV('┌'), 0xC9, 0},
     {IV('┐'), 0xCA, 0},
     {IV('└'), 0xCB, 0},
@@ -448,7 +450,6 @@ static const hd44780_charmap_t g_hd44780_charmap_device[] PROGMEM = {
     {IV('⭡'), 0xC5, 0},
     {IV('⭢'), 0xC7, 0},
     {IV('⭣'), 0xC6, 0},
-
 
     {IV('⯆'), 0xF5, 0},
     {IV('⯇'), 0xF7, 0}, // ⯅
@@ -499,7 +500,6 @@ static const hd44780_charmap_t g_hd44780_charmap_device[] PROGMEM = {
     //{IV(''), 0x9D, 0},
     //{IV(''), 0x9E, 0},
     //{IV(''), 0x9F, 0},
-
 
     {IV('¼'), 0xF0, 0}, // 00BC
     {IV('⅓'), 0xF1, 0},
@@ -962,7 +962,10 @@ static const hd44780_charmap_t g_hd44780_charmap_common[] PROGMEM = {
   {IV('≡'), '=', 0}, // 2261
   {IV('≤'), '<', '='},// 2264, ≤≥ ⩽⩾
   {IV('≥'), '>', '='}, // 2265
-  {IV('⏱'), 0x07, 0}, // 23F1, Marlin special: '🕐🕑🕒🕓🕔🕕🕖🕗🕘🕙🕚🕛🕜🕝🕞🕟🕠🕡🕢🕣🕤🕥🕦🕧 ⌚⌛⏰⏱⏳⧖⧗'  LCD_STR_CLOCK (0x05)
+
+  #if NEED_CLOCK_GLYPH
+    {IV('⏱'), 0x07, 0}, // 23F1, Marlin special: '🕐🕑🕒🕓🕔🕕🕖🕗🕘🕙🕚🕛🕜🕝🕞🕟🕠🕡🕢🕣🕤🕥🕦🕧 ⌚⌛⏰⏱⏳⧖⧗'  LCD_STR_CLOCK (0x05)
+  #endif
 
   {IV('゠'), '=', 0}, // 30A0
 

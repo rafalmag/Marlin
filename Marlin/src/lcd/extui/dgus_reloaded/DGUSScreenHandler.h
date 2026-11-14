@@ -45,7 +45,7 @@ public:
   static void configurationStoreWritten(bool success);
   static void configurationStoreRead(bool success);
 
-  static void playTone(const uint16_t frequency, const uint16_t duration);
+  static void playTone(const uint16_t frequency, const uint16_t duration=0);
   static void meshUpdate(const int8_t xpos, const int8_t ypos);
   static void printTimerStarted();
   static void printTimerPaused();
@@ -53,11 +53,11 @@ public:
   static void filamentRunout(const ExtUI::extruder_t extruder);
 
   #if HAS_MEDIA
-    /// Marlin informed us that a new SD has been inserted.
+    // Marlin informed us that a new SD has been inserted.
     static void sdCardInserted();
-    /// Marlin informed us that the SD Card has been removed().
+    // Marlin informed us that the SD Card has been removed().
     static void sdCardRemoved();
-    /// Marlin informed us about a bad SD Card.
+    // Marlin informed us about a bad SD Card.
     static void sdCardError();
   #endif
 
@@ -66,15 +66,16 @@ public:
   #endif
 
   #if HAS_PID_HEATING
-    static void pidTuning(const ExtUI::result_t rst);
+    static void pidTuning(const ExtUI::pidresult_t rst);
   #endif
 
   static void setMessageLine(const char * const msg, const uint8_t line);
-  static void setMessageLinePGM(PGM_P const msg, const uint8_t line);
-  static void setMessageLine(FSTR_P const msg, const uint8_t line) { setMessageLinePGM(FTOP(msg), line); }
+  static void setMessageLine_P(PGM_P const msg, const uint8_t line);
+  static void setMessageLine(FSTR_P const msg, const uint8_t line) { setMessageLine_P(FTOP(msg), line); }
 
   static void setStatusMessage(const char* msg, const millis_t duration=DGUS_STATUS_EXPIRATION_MS);
   static void setStatusMessage(FSTR_P const msg, const millis_t duration=DGUS_STATUS_EXPIRATION_MS);
+  static void setStandingStatus(const char * const msg);
 
   static void showWaitScreen(const DGUS_ScreenID return_screenID, const bool has_continue=false);
   static void showWaitScreen(FSTR_P const msg, const DGUS_ScreenID return_screenID, const bool has_continue=false);
@@ -106,12 +107,18 @@ public:
   static char gcode[DGUS_GCODE_LEN + 1];
 
   static DGUS_Data::Heater pid_heater;
-  static uint16_t pid_temp;
+  static celsius_t pid_temp;
   static uint8_t pid_cycles;
 
   static bool wait_continue;
 
   static bool leveling_active;
+
+  static uint8_t language;
+
+  #if ENABLED(FILAMENT_SWITCH_AND_MOTION)
+    static uint16_t jam_length;
+  #endif
 
 private:
   static const DGUS_Addr* findScreenAddrList(const DGUS_ScreenID screenID);
@@ -130,6 +137,7 @@ private:
   static DGUS_ScreenID wait_return_screenID;
 
   static millis_t status_expire;
+  static char standing_status[DGUS_STATUS_LEN + 1];
   static millis_t eeprom_save;
 
   typedef struct {
@@ -137,6 +145,7 @@ private:
     uint8_t volume;
     uint8_t brightness;
     bool abl_okay;
+    uint8_t language;
   } eeprom_data_t;
 };
 

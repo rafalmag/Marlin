@@ -54,13 +54,8 @@
 
 #if HAS_TMC_UART
   #define E1_SERIAL_TX_PIN                  PF8
-  #define E1_SERIAL_RX_PIN      E1_SERIAL_TX_PIN
-
   #define E2_SERIAL_TX_PIN                  PD14
-  #define E2_SERIAL_RX_PIN      E2_SERIAL_TX_PIN
-
   #define E3_SERIAL_TX_PIN                  PD10
-  #define E3_SERIAL_RX_PIN      E3_SERIAL_TX_PIN
 
   // Reduce baud rate to improve software serial reliability
   #ifndef TMC_BAUD_RATE
@@ -70,10 +65,20 @@
 #endif // HAS_TMC_UART
 
 //
+// CAN bus
+//
+#ifndef CAN_RX_PIN
+  #define CAN_RX_PIN                        PD12  // FDCAN1 RX
+#endif
+#ifndef CAN_TX_PIN
+  #define CAN_TX_PIN                        PD13  // FDCAN1 TX
+#endif
+
+//
 // NeoPixel LED
 //
-#ifndef NEOPIXEL_PIN
-  #define NEOPIXEL_PIN                      PA9
+#ifndef BOARD_NEOPIXEL_PIN
+  #define BOARD_NEOPIXEL_PIN                PA9
 #endif
 
 #ifndef NEOPIXEL2_PIN

@@ -4,7 +4,6 @@
  *
  * Based on Sprinter and grbl.
  * Copyright (c) 2011 Camiel Gubbels / Erik van der Zalm
- * Copyright (c) 2017 Victor Perez
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -73,7 +72,7 @@ void spiInit(uint8_t spiRate) {
   }
 
   spiConfig = SPISettings(clock, MSBFIRST, SPI_MODE0);
-  SPI.begin();
+  SPI.begin(SD_SCK_PIN, SD_MISO_PIN, SD_MOSI_PIN, SD_SS_PIN);
 }
 
 uint8_t spiRec() {

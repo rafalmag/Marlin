@@ -23,6 +23,14 @@
 
 #include "../../inc/MarlinConfig.h"
 
+#if ENABLED(TOUCH_SCREEN_CALIBRATION)
+
+#define _TOUCH_CALIBRATION_X touch_calibration.calibration.x
+#define _TOUCH_CALIBRATION_Y touch_calibration.calibration.y
+#define _TOUCH_OFFSET_X      touch_calibration.calibration.offset_x
+#define _TOUCH_OFFSET_Y      touch_calibration.calibration.offset_y
+#define _TOUCH_ORIENTATION   touch_calibration.calibration.orientation
+
 #ifndef TOUCH_SCREEN_CALIBRATION_PRECISION
   #define TOUCH_SCREEN_CALIBRATION_PRECISION  80
 #endif
@@ -68,7 +76,7 @@ public:
   static bool need_calibration() { return !calibration.offset_x && !calibration.offset_y && !calibration.x && !calibration.y; }
 
   static calibrationState calibration_start() {
-    next_touch_update_ms = millis() + 750UL;
+    next_touch_update_ms = next_millis(millis() + 750UL);
     calibration = { 0, 0, 0, 0, TOUCH_ORIENTATION_NONE };
     calibration_state = CALIBRATION_TOP_LEFT;
     calibration_points[CALIBRATION_TOP_LEFT].x = 30;
@@ -93,3 +101,13 @@ public:
 };
 
 extern TouchCalibration touch_calibration;
+
+#else // !TOUCH_SCREEN_CALIBRATION
+
+#define _TOUCH_CALIBRATION_X (TOUCH_CALIBRATION_X)
+#define _TOUCH_CALIBRATION_Y (TOUCH_CALIBRATION_Y)
+#define _TOUCH_OFFSET_X      (TOUCH_OFFSET_X)
+#define _TOUCH_OFFSET_Y      (TOUCH_OFFSET_Y)
+#define _TOUCH_ORIENTATION   (TOUCH_ORIENTATION)
+
+#endif

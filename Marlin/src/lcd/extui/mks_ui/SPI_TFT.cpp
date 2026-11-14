@@ -63,9 +63,7 @@ void TFT::lcdInit() {
   #if PIN_EXISTS(TFT_BACKLIGHT)
     OUT_WRITE(TFT_BACKLIGHT_PIN, HIGH);
   #endif
-  #if HAS_LOGO_IN_FLASH
-    delay(2000);
-  #endif
+  TERN_(MKS_LOGO_IN_FLASH, delay(2000));
 }
 
 void TFT::lcdClear(uint16_t color) {
@@ -74,7 +72,7 @@ void TFT::lcdClear(uint16_t color) {
 }
 
 void TFT::lcdDrawLogo() {
-  #if HAS_LOGO_IN_FLASH
+  #if MKS_LOGO_IN_FLASH
     setWindow(0, 0, TFT_WIDTH, TFT_HEIGHT);
     for (uint16_t i = 0; i < (TFT_HEIGHT); i++) {
       picLogoRead((uint8_t *)"", (uint8_t *)bmp_public_buf, (TFT_WIDTH) * 2);

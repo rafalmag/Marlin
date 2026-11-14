@@ -21,7 +21,7 @@
  */
 
 /**
- * lcd/extui/dgus_e3s1pro/dgus_e3s1pro_extui.cpp
+ * lcd/extui/dgus_reloaded/dgus_reloaded_extui.cpp
  */
 
 #include "../../../inc/MarlinConfigPre.h"
@@ -50,11 +50,11 @@ namespace ExtUI {
     screen.printerKilled(error, component);
   }
 
-  void onMediaInserted() { TERN_(HAS_MEDIA, screen.sdCardInserted()); }
+  void onMediaMounted()  { TERN_(HAS_MEDIA, screen.sdCardInserted()); }
   void onMediaError()    { TERN_(HAS_MEDIA, screen.sdCardError()); }
   void onMediaRemoved()  { TERN_(HAS_MEDIA, screen.sdCardRemoved()); }
 
-  void onPlayTone(const uint16_t frequency, const uint16_t duration) {
+  void onPlayTone(const uint16_t frequency, const uint16_t duration/*=0*/) {
     screen.playTone(frequency, duration);
   }
 
@@ -78,13 +78,31 @@ namespace ExtUI {
     screen.userConfirmRequired(msg);
   }
 
-  void onStatusChanged(const char * const msg) {
-    screen.setStatusMessage(msg);
+  // For fancy LCDs include an icon ID, message, and translated button title
+  void onUserConfirmRequired(const int, const char * const cstr, FSTR_P const) {
+    onUserConfirmRequired(cstr);
+  }
+  void onUserConfirmRequired(const int, FSTR_P const fstr, FSTR_P const) {
+    onUserConfirmRequired(fstr);
   }
 
-  void onHomingStart() {}
-  void onHomingDone() {}
-  void onPrintDone() {}
+  #if ENABLED(ADVANCED_PAUSE_FEATURE)
+    void onPauseMode(
+      const PauseMessage message,
+      const PauseMode mode/*=PAUSE_MODE_SAME*/,
+      const uint8_t extruder/*=motion.extruder*/
+    ) {
+      // This UI has no "Purge More / Resume" choice, so don't wait for one
+      if (message == PAUSE_MESSAGE_OPTION)
+        setPauseMenuResponse(PAUSE_RESPONSE_RESUME_PRINT);
+      else
+        stdOnPauseMode(message, mode, extruder);
+    }
+  #endif
+
+  void onStatusChanged(const char * const msg) {
+    screen.setStandingStatus(msg);
+  }
 
   void onFactoryReset() {
     screen.settingsReset();
@@ -98,8 +116,6 @@ namespace ExtUI {
     screen.loadSettings(buff);
   }
 
-  void onPostprocessSettings() {}
-
   void onSettingsStored(const bool success) {
     screen.configurationStoreWritten(success);
   }
@@ -108,13 +124,8 @@ namespace ExtUI {
     screen.configurationStoreRead(success);
   }
 
-  #if HAS_LEVELING
-    void onLevelingStart() {}
-    void onLevelingDone() {}
-  #endif
-
   #if HAS_MESH
-    void onMeshUpdate(const int8_t xpos, const int8_t ypos, const_float_t zval) {
+    void onMeshUpdate(const int8_t xpos, const int8_t ypos, const float zval) {
       screen.meshUpdate(xpos, ypos);
     }
 
@@ -125,12 +136,6 @@ namespace ExtUI {
   #endif
 
   #if ENABLED(POWER_LOSS_RECOVERY)
-    void onSetPowerLoss(const bool onoff) {
-      // Called when power-loss is enabled/disabled
-    }
-    void onPowerLoss() {
-      // Called when power-loss state is detected
-    }
     void onPowerLossResume() {
       // Called on resume from power-loss
       screen.powerLossResume();
@@ -138,14 +143,11 @@ namespace ExtUI {
   #endif
 
   #if HAS_PID_HEATING
-    void onPidTuning(const result_t rst) {
+    void onPIDTuning(const pidresult_t rst) {
       // Called for temperature PID tuning result
       screen.pidTuning(rst);
     }
   #endif
-
-  void onSteppersDisabled() {}
-  void onSteppersEnabled()  {}
 }
 
 #endif // DGUS_LCD_UI_RELOADED

@@ -103,12 +103,13 @@ namespace ExtUI {
   }
 
   #if HAS_PID_HEATING
-
-    void onPidTuning(const result_t rst) {
+    void onPIDTuning(const pidresult_t rst) {
       // Called for temperature PID tuning result
-      //SERIAL_ECHOLNPGM("OnPidTuning:", rst);
+      //SERIAL_ECHOLNPGM("OnPIDTuning:", rst);
       switch (rst) {
         case PID_STARTED:
+        case PID_BED_STARTED:
+        case PID_CHAMBER_STARTED:
           set_lcd_error(GET_TEXT_F(MSG_PID_AUTOTUNE));
           break;
         case PID_BAD_HEATER_ID:
@@ -125,55 +126,10 @@ namespace ExtUI {
           break;
       }
     }
-
   #endif
 
   void onPrintTimerStarted() { write_to_lcd(F("{SYS:BUILD}")); }
-  void onPrintTimerPaused() {}
   void onPrintTimerStopped() { write_to_lcd(F("{TQ:100}")); }
-
-  // Not needed for Malyan LCD
-  void onStatusChanged(const char * const) {}
-  void onMediaInserted() {}
-  void onMediaError() {}
-  void onMediaRemoved() {}
-  void onPlayTone(const uint16_t, const uint16_t) {}
-  void onFilamentRunout(const extruder_t extruder) {}
-  void onUserConfirmRequired(const char * const) {}
-  void onHomingStart() {}
-  void onHomingDone() {}
-  void onPrintDone() {}
-  void onFactoryReset() {}
-  void onStoreSettings(char*) {}
-  void onLoadSettings(const char*) {}
-  void onPostprocessSettings() {}
-  void onSettingsStored(const bool) {}
-  void onSettingsLoaded(const bool) {}
-
-  #if HAS_LEVELING
-    void onLevelingStart() {}
-    void onLevelingDone() {}
-  #endif
-
-  #if HAS_MESH
-    void onMeshUpdate(const int8_t, const int8_t, const_float_t) {}
-    void onMeshUpdate(const int8_t, const int8_t, const ExtUI::probe_state_t) {}
-  #endif
-
-  #if ENABLED(POWER_LOSS_RECOVERY)
-    void onSetPowerLoss(const bool onoff) {
-      // Called when power-loss is enabled/disabled
-    }
-    void onPowerLoss() {
-      // Called when power-loss state is detected
-    }
-    void onPowerLossResume() {
-      // Called on resume from power-loss
-    }
-  #endif
-
-  void onSteppersDisabled() {}
-  void onSteppersEnabled()  {}
 }
 
 #endif // MALYAN_LCD

@@ -27,11 +27,19 @@
 
 #include "limits.h"
 
-extern int8_t encoderLine, encoderTopLine, screen_items;
+extern int8_t menuIndex, menuTopIndex, screen_items;
+
+// Static lines are never selected: the selection moves on in the direction of travel
+void menu_skip_static();
 
 void scroll_screen(const uint8_t limit, const bool is_menu);
+void scroll_screen_end();
 
 typedef void (*selectFunc_t)();
+
+#if ALL(TFT_COLOR_UI, TOUCH_SCREEN)
+  #define TFT_COLOR_TOUCH 1
+#endif
 
 #define SS_LEFT    0x00
 #define SS_CENTER  0x01
@@ -59,17 +67,17 @@ class MenuItemBase {
     static const char* itemStringC;
 
     // Store an index and string for later substitution
-    FORCE_INLINE static void init(const int8_t ind=0, FSTR_P const fstr=nullptr) { itemIndex = ind; itemStringF = fstr; itemStringC = nullptr; }
-    FORCE_INLINE static void init(const int8_t ind, const char * const cstr) { itemIndex = ind; itemStringC = cstr; itemStringF = nullptr; }
+    FORCE_INLINE static void init(const int8_t ind=-1, FSTR_P const fstr=nullptr) { itemStringF = fstr; itemStringC = nullptr; if (ind >= 0) itemIndex = ind; }
+    FORCE_INLINE static void init(const int8_t ind, const char * const cstr)      { itemStringC = cstr; itemStringF = nullptr; if (ind >= 0) itemIndex = ind; }
 
     // Implementation-specific:
     // Draw an item either selected (pre_char) or not (space) with post_char
     // Menus may set up itemIndex, itemStringC/F and pass them to string-building or string-emitting functions
-    static void _draw(const bool sel, const uint8_t row, FSTR_P const fstr, const char pre_char, const char post_char);
+    static void _draw(const bool sel, const uint8_t row, FSTR_P const ftpl, const char pre_char, const char post_char);
 
     // Draw an item either selected ('>') or not (space) with post_char
-    FORCE_INLINE static void _draw(const bool sel, const uint8_t row, FSTR_P const fstr, const char post_char) {
-      _draw(sel, row, fstr, '>', post_char);
+    FORCE_INLINE static void _draw(const bool sel, const uint8_t row, FSTR_P const ftpl, const char post_char) {
+      _draw(sel, row, ftpl, '>', post_char);
     }
 };
 
@@ -82,8 +90,8 @@ class MenuItem_static : public MenuItemBase {
 // BACK_ITEM(LABEL)
 class MenuItem_back : public MenuItemBase {
   public:
-    FORCE_INLINE static void draw(const bool sel, const uint8_t row, FSTR_P const fstr) {
-      _draw(sel, row, fstr, LCD_STR_UPLEVEL[0], LCD_STR_UPLEVEL[0]);
+    FORCE_INLINE static void draw(const bool sel, const uint8_t row, FSTR_P const ftpl) {
+      _draw(sel, row, ftpl, LCD_STR_UPLEVEL[0], LCD_STR_UPLEVEL[0]);
     }
     // Back Item action goes back one step in history
     FORCE_INLINE static void action(FSTR_P const=nullptr) { ui.go_back(); }
@@ -145,7 +153,10 @@ typedef union {
   uint16_t  uint16;
   uint32_t  uint32;
   celsius_t celsius;
+  void      *ptr;
+  FSTR_P    fstr;
 } chimera_t;
+
 extern chimera_t editable;
 
 // Base class for Menu Edit Items
@@ -158,20 +169,30 @@ class MenuEditItemBase : public MenuItemBase {
     static FSTR_P editLabel;
     static void *editValue;
     static int32_t minEditValue, maxEditValue;  // Encoder value range
+    #if ENABLED(TFT_COLOR_UI)
+      static intptr_t valueToString;
+      static bool itemEdit; // Drawing a menu item's edit screen, not babystep, move axis, etc.
+    #endif
+    #if TFT_COLOR_TOUCH
+      static float valueStep; // Encoder units per displayed unit (1 = integer entry)
+      static void reset_edit_screen_state();
+    #endif
     static screenFunc_t callbackFunc;
     static bool liveEdit;
   protected:
     typedef const char* (*strfunc_t)(const int32_t);
     typedef void (*loadfunc_t)(void *, const int32_t);
     static void goto_edit_screen(
-      FSTR_P const el,        // Edit label
-      void * const ev,        // Edit value pointer
-      const int32_t minv,     // Encoder minimum
-      const int32_t maxv,     // Encoder maximum
-      const uint32_t ep,      // Initial encoder value
-      const screenFunc_t cs,  // MenuItem_type::draw_edit_screen => MenuEditItemBase::edit()
-      const screenFunc_t cb,  // Callback after edit
-      const bool le           // Flag to call cb() during editing
+        FSTR_P const el       // Edit label
+      , void * const ev       // Edit value pointer
+      , const int32_t minv    // Encoder minimum
+      , const int32_t maxv    // Encoder maximum
+      OPTARG(TFT_COLOR_UI, intptr_t to_string)  // Value-to-string conversion function
+      OPTARG(TFT_COLOR_TOUCH, const float step) // Encoder units per displayed unit
+      , const uint32_t ep     // Initial encoder value
+      , const screenFunc_t cs // MenuItem_type::draw_edit_screen => MenuEditItemBase::edit()
+      , const screenFunc_t cb // Callback after edit
+      , const bool le         // Flag to call cb() during editing
     );
     static void edit_screen(strfunc_t, loadfunc_t); // Edit value handler
   public:
@@ -188,7 +209,15 @@ class MenuEditItemBase : public MenuItemBase {
     static void draw_edit_screen(FSTR_P const fstr, const char * const value);
 
     // This method is for the current menu item
-    static void draw_edit_screen(const char * const value) { draw_edit_screen(editLabel, value); }
+    static void draw_edit_screen(const char * const value) {
+      TERN_(TFT_COLOR_UI, itemEdit = true);
+      draw_edit_screen(editLabel, value);
+      TERN_(TFT_COLOR_UI, itemEdit = false);
+    }
+
+    #if TFT_COLOR_TOUCH
+      static void put_new_value(const float val);
+    #endif
 };
 
 #if HAS_MEDIA
@@ -208,7 +237,9 @@ void menu_main();
 void menu_move();
 
 #if HAS_MEDIA
-  void menu_media();
+  void menu_file_selector();
+  void menu_file_selector_sd();
+  void menu_file_selector_usb();
 #endif
 
 ////////////////////////////////////////////
@@ -220,7 +251,7 @@ void _lcd_draw_homing();
 #define HAS_LINE_TO_Z ANY(DELTA, PROBE_MANUALLY, MESH_BED_LEVELING, LCD_BED_TRAMMING)
 
 #if HAS_LINE_TO_Z
-  void line_to_z(const_float_t z);
+  void line_to_z(const float z);
 #endif
 
 #if ENABLED(PROBE_OFFSET_WIZARD)
@@ -232,7 +263,7 @@ void _lcd_draw_homing();
   void menu_advanced_settings();
 #endif
 
-#if ENABLED(LCD_BED_LEVELING) || (HAS_LEVELING && DISABLED(SLIM_LCD_MENUS))
+#if HAS_LEVELING
   void _lcd_toggle_bed_leveling();
 #endif
 
@@ -263,4 +294,8 @@ inline void clear_menu_history() { screen_history_depth = 0; }
 
 #if ANY(PROBE_MANUALLY, MESH_BED_LEVELING, X_AXIS_TWIST_COMPENSATION)
   extern uint8_t manual_probe_index;
+#endif
+
+#if ANY(CUSTOM_MENU_MAIN, CUSTOM_MENU_CONFIG)
+  template<bool> void _lcd_custom_menu_gcode(FSTR_P const fstr);
 #endif

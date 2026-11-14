@@ -45,11 +45,11 @@ namespace ExtUI {
     dgus.printerKilled(error, component);
   }
 
-  void onMediaInserted() { dgus.mediaEvent(AC_media_inserted); }
-  void onMediaError()    { dgus.mediaEvent(AC_media_error);    }
-  void onMediaRemoved()  { dgus.mediaEvent(AC_media_removed);  }
+  void onMediaMounted() { dgus.mediaEvent(AC_media_inserted); }
+  void onMediaError()   { dgus.mediaEvent(AC_media_error);    }
+  void onMediaRemoved() { dgus.mediaEvent(AC_media_removed);  }
 
-  void onPlayTone(const uint16_t frequency, const uint16_t duration) {
+  void onPlayTone(const uint16_t frequency, const uint16_t duration/*=0*/) {
     #if ENABLED(SPEAKER)
       ::tone(BEEPER_PIN, frequency, duration);
     #endif
@@ -58,12 +58,30 @@ namespace ExtUI {
   void onPrintTimerStarted() { dgus.timerEvent(AC_timer_started); }
   void onPrintTimerPaused()  { dgus.timerEvent(AC_timer_paused);  }
   void onPrintTimerStopped() { dgus.timerEvent(AC_timer_stopped); }
-  void onPrintDone() {}
 
-  void onFilamentRunout(const extruder_t)            { dgus.filamentRunout();         }
+  void onFilamentRunout(const extruder_t)            { dgus.filamentRunout(); }
 
   void onUserConfirmRequired(const char * const msg) { dgus.confirmationRequest(msg); }
-  void onStatusChanged(const char * const msg)       { dgus.statusChange(msg);        }
+
+  // For fancy LCDs include an icon ID, message, and translated button title
+  void onUserConfirmRequired(const int, const char * const cstr, FSTR_P const) {
+    onUserConfirmRequired(cstr);
+  }
+  void onUserConfirmRequired(const int, FSTR_P const fstr, FSTR_P const) {
+    onUserConfirmRequired(fstr);
+  }
+
+  #if ENABLED(ADVANCED_PAUSE_FEATURE)
+    void onPauseMode(
+      const PauseMessage message,
+      const PauseMode mode/*=PAUSE_MODE_SAME*/,
+      const uint8_t extruder/*=motion.extruder*/
+    ) {
+      stdOnPauseMode(message, mode, extruder);
+    }
+  #endif
+
+  void onStatusChanged(const char * const msg)       { dgus.statusChange(msg); }
 
   void onHomingStart()    { dgus.homingStart(); }
   void onHomingDone()     { dgus.homingComplete(); }
@@ -95,60 +113,12 @@ namespace ExtUI {
   void onPostprocessSettings() {
     // Called after loading or resetting stored settings
     dgus.paramInit();
-    dgus.powerLoss();
   }
-
-  void onSettingsStored(const bool success) {
-    // Called after the entire EEPROM has been written,
-    // whether successful or not.
-  }
-
-  void onSettingsLoaded(const bool success) {
-    // Called after the entire EEPROM has been read,
-    // whether successful or not.
-  }
-
-  #if HAS_LEVELING
-    void onLevelingStart() {}
-    void onLevelingDone() {}
-  #endif
-
-  #if HAS_MESH
-    void onMeshUpdate(const int8_t xpos, const int8_t ypos, const_float_t zval) {
-      // Called when any mesh points are updated
-      //SERIAL_ECHOLNPGM("onMeshUpdate() x:", xpos, " y:", ypos, " z:", zval);
-    }
-
-    void onMeshUpdate(const int8_t xpos, const int8_t ypos, const probe_state_t state) {
-      // Called to indicate a special condition
-      //SERIAL_ECHOLNPGM("onMeshUpdate() x:", xpos, " y:", ypos, " state:", state);
-    }
-  #endif
 
   #if ENABLED(POWER_LOSS_RECOVERY)
-    // Called when power-loss is enabled/disabled
-    void onSetPowerLoss(const bool) { dgus.powerLoss(); }
-    // Called when power-loss state is detected
-    void onPowerLoss() { /* handled internally */ }
     // Called on resume from power-loss
     void onPowerLossResume() { dgus.powerLossRecovery(); }
   #endif
-
-  #if HAS_PID_HEATING
-    void onPidTuning(const result_t rst) {
-      // Called for temperature PID tuning result
-      switch (rst) {
-        case PID_STARTED:        break;
-        case PID_BAD_HEATER_ID:  break;
-        case PID_TEMP_TOO_HIGH:  break;
-        case PID_TUNING_TIMEOUT: break;
-        case PID_DONE:           break;
-      }
-    }
-  #endif
-
-  void onSteppersDisabled() {}
-  void onSteppersEnabled()  {}
 }
 
 #endif // ANYCUBIC_LCD_VYPER
